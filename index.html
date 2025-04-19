@@ -110,7 +110,7 @@
                             </div>
                             <div class="form-floating mb-3">
                                 <textarea class="form-control" id="episodeDescription" placeholder=" " style="height: 100px"></textarea>
-                                <label for="episodeDescription">Description</label>
+                                <label for="episodeDescription">Video Link (Reference)</label>
                             </div>
                             <div class="row g-2 mb-3">
                                 <div class="col-md-6">
@@ -136,7 +136,7 @@
                                         <p>Drag & drop your audio file or click to browse</p>
                                         <span class="browse-btn">Browse files</span>
                                     </div>
-                                    <input type="file" id="audioFile" accept="audio/*" class="input-file" required>
+                                    <input type="file" id="audioFile" accept="audio/*" class="input-file" data-edit-required="false" required>
                                 </label>
                                 <div class="invalid-feedback">Please select an audio file</div>
                                 <div id="fileInfo" class="file-info mt-2 d-none">
@@ -249,9 +249,9 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">
+                   <!--<button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">
                         <i class="ri-close-line me-1"></i> Close
-                    </button>
+                    </button>-->
                     <div class="d-flex gap-2">
                         <button type="button" class="btn btn-outline-light" id="favoriteBtn">
                             <i class="ri-heart-line me-1"></i> Favorite

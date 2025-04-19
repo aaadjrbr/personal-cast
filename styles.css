@@ -798,7 +798,7 @@ audio::-webkit-media-controls-mute-button {
 
 .toggle-add-btn.visible {
     opacity: 1;
-    top: 50px;
+    bottom: 180px;
     visibility: visible;
 }
 
