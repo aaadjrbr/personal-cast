@@ -613,7 +613,7 @@ function displayEpisodes() {
                 <div class="episode-meta">
                     <div class="meta-item">
                         <i class="ri-calendar-line"></i>
-                        <span>${formatDate(episode.date)}</span>
+                        <span>${formatDate(episode.createdAt)}</span>
                     </div>
                     <div class="meta-item">
                         <i class="ri-price-tag-3-line"></i>
@@ -1087,11 +1087,23 @@ modalAudioPlayer.addEventListener('ended', function() {
 });
 
 // Format date for display
-function formatDate(dateString) {
-    if (!dateString) return 'Unknown date';
-    
+function formatDate(dateInput) {
+    if (!dateInput) return 'Unknown date';
+
+    let date;
+    if (typeof dateInput === 'string') {
+        // Handle string date (e.g., '2025-04-19')
+        date = new Date(dateInput);
+    } else if (dateInput instanceof firebase.firestore.Timestamp) {
+        // Handle Firestore timestamp
+        date = dateInput.toDate();
+    } else {
+        // Handle unexpected input
+        return 'Invalid date';
+    }
+
     const options = { year: 'numeric', month: 'long', day: 'numeric' };
-    return new Date(dateString).toLocaleDateString(undefined, options);
+    return date.toLocaleDateString(undefined, options);
 }
 
 // Set today's date for the date picker
