@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HarmonyCast | Personal Podcast Hub</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.4.0/fonts/remixicon.css" rel="stylesheet">
+    
+    <!-- Libraries -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="animated-bg"></div>
+    <div id="scroll-here"></div>
+    
+    <!-- Login Modal -->
+    <div class="modal fade" id="loginModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content glass-card">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="ri-lock-2-line me-2"></i>
+                        Admin Login
+                    </h5>
+                    <button type="button" class="btn-close-modal" data-bs-dismiss="modal" aria-label="Close">
+                        <i class="ri-close-line"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="loginForm">
+                        <div class="form-floating mb-3">
+                            <input type="email" class="form-control" id="loginEmail" placeholder=" " required>
+                            <label for="loginEmail">Email</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="password" class="form-control" id="loginPassword" placeholder=" " required>
+                            <label for="loginPassword">Password</label>
+                        </div>
+                        <div id="authError" class="auth-error mb-3"></div>
+                        <button type="submit" class="btn btn-gradient-primary w-100">
+                            <span id="loginBtnText">Sign In</span>
+                            <span id="loginSpinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                        </button>
+                    </form>
+                </div>
+                <div class="modal-footer justify-content-center">
+                    <button type="button" class="btn btn-link" id="forgotPassword">Forgot password?</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Header with Admin Button -->
+        <header class="main-header">
+            <div class="header-content">
+                <div class="logo-container">
+                    <svg class="logo-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 3V21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M8 8V16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M20 6V18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M4 10V14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M16 5V19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                    <h1 class="logo-text">Harmony<span>Cast</span></h1>
+                </div>
+                <p class="header-subtitle">Your personal audio sanctuary</p>
+                <button class="btn btn-outline-light btn-admin" id="adminLoginBtn">
+                    <i class="ri-admin-line me-1"></i> Admin
+                </button>
+            </div>
+            <div class="wave-divider">
+                <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
+                    <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" class="shape-fill"></path>
+                </svg>
+            </div>
+        </header>
+        <!-- Main Content -->
+        <div class="container">
+            <!-- Add Episode Section (Hidden by default) -->
+            <div class="add-episode-section" id="addEpisodeSection">
+                <div class="card glass-card upload-card" data-aos="fade-up" data-aos-delay="100">
+                    <div class="card-header d-flex align-items-center">
+                        <i class="ri-upload-cloud-2-fill me-2"></i>
+                        <h5>Upload New Episode</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="uploadForm" class="needs-validation" novalidate>
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" id="episodeTitle" placeholder=" " required>
+                                <label for="episodeTitle">Episode Title</label>
+                                <div class="invalid-feedback">Please provide a title</div>
+                            </div>
+                            <div class="form-floating mb-3">
+                                <textarea class="form-control" id="episodeDescription" placeholder=" " style="height: 100px"></textarea>
+                                <label for="episodeDescription">Description</label>
+                            </div>
+                            <div class="row g-2 mb-3">
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <input type="text" class="form-control" id="episodeType" placeholder=" " required>
+                                        <label for="episodeType">Category</label>
+                                        <div class="invalid-feedback">Please select a category</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <input type="date" class="form-control" id="episodeDate" placeholder=" " required>
+                                        <label for="episodeDate">Release Date</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="file-upload-wrapper mb-4">
+                                <label for="audioFile" class="file-upload-label">
+                                    <div class="file-upload-design">
+                                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M12 15V3M12 15L8 11M12 15L16 11M21 18V20C21 21.1046 20.1046 22 19 22H5C3.89543 22 3 21.1046 3 20V18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        </svg>
+                                        <p>Drag & drop your audio file or click to browse</p>
+                                        <span class="browse-btn">Browse files</span>
+                                    </div>
+                                    <input type="file" id="audioFile" accept="audio/*" class="input-file" required>
+                                </label>
+                                <div class="invalid-feedback">Please select an audio file</div>
+                                <div id="fileInfo" class="file-info mt-2 d-none">
+                                    <i class="ri-music-2-fill me-2"></i>
+                                    <span id="fileName"></span>
+                                    <button type="button" class="btn-close-file" aria-label="Remove">
+                                        <i class="ri-close-line"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-outline-light w-100 d-none" id="cancelEditBtn">
+                                    <i class="ri-close-line me-1"></i> Cancel
+                                </button>
+                                <button type="submit" class="btn btn-gradient-primary w-100" id="uploadBtn">
+                                    <span id="uploadBtnText">Upload Episode</span>
+                                    <span id="uploadSpinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Episodes Section -->
+            <div class="card glass-card episodes-card" data-aos="fade-up" data-aos-delay="150">
+                <div class="card-header d-flex flex-column flex-md-row justify-content-md-between align-items-md-center">
+                    <div class="d-flex align-items-center gap-3">
+                        <h5 class="d-flex align-items-center m-0">
+                            <i class="ri-mic-fill me-2"></i>
+                            My Episodes
+                        </h5>
+                        <button class="btn btn-sm btn-outline-light d-none" id="showFavoritesBtn">
+                            <i class="ri-heart-line me-1"></i> Favorites
+                        </button>
+                        <button class="btn btn-sm btn-outline-light d-none" id="showAllBtn">
+                            <i class="ri-list-check me-1"></i> All Episodes
+                        </button>
+                    </div>
+                    <div class="d-flex flex-column flex-md-row gap-3 mt-3 mt-md-0">
+                        <div class="search-container">
+                            <i class="ri-search-line search-icon"></i>
+                            <input type="text" id="searchInput" class="search-input" placeholder="Search episodes...">
+                            <i class="ri-close-line search-clear d-none"></i>
+                        </div>
+                        <div class="filter-container">
+                            <select id="typeFilter" class="form-select filter-select">
+                                <option value="">All Categories</option>
+                            </select>
+                            <i class="ri-arrow-down-s-line filter-arrow"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="episodesList" class="episodes-grid"></div>
+                    
+                    <!-- Pagination -->
+                    <nav aria-label="Page navigation" class="mt-4">
+                        <ul class="pagination justify-content-center" id="pagination">
+                            <!-- Pagination will be added here by JavaScript -->
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Audio Player Modal -->
+    <div class="modal fade" id="audioPlayerModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content glass-card">
+                <div class="modal-header">
+                    <h5 class="modal-title d-flex align-items-center">
+                        <i class="ri-play-circle-fill me-2"></i>
+                        <span id="audioPlayerTitle">Episode Title</span>
+                    </h5>
+                    <button type="button" class="btn-close-modal" data-bs-dismiss="modal" aria-label="Close">
+                        <i class="ri-close-line"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="audio-player-container">
+                        <div class="audio-visualizer">
+                            <div class="audio-bar"></div>
+                            <div class="audio-bar"></div>
+                            <div class="audio-bar"></div>
+                            <div class="audio-bar"></div>
+                            <div class="audio-bar"></div>
+                            <div class="audio-bar"></div>
+                            <div class="audio-bar"></div>
+                            <div class="audio-bar"></div>
+                        </div>
+                        <audio controls id="modalAudioPlayer">
+                            Your browser does not support the audio element.
+                        </audio>
+                    </div>
+                    <div class="episode-meta">
+                        <div class="meta-item">
+                            <i class="ri-calendar-line"></i>
+                            <span id="audioPlayerDate">Unknown date</span>
+                        </div>
+                        <div class="meta-item">
+                            <i class="ri-tag-line"></i>
+                            <span id="audioPlayerCategory">Uncategorized</span>
+                        </div>
+                    </div>
+                    <div class="episode-description">
+                        <p id="audioPlayerDescription" class="mb-0"></p>
+                        <button class="read-more-btn mt-2 d-none" id="modalReadMoreBtn">Read more</button>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">
+                        <i class="ri-close-line me-1"></i> Close
+                    </button>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-outline-light" id="favoriteBtn">
+                            <i class="ri-heart-line me-1"></i> Favorite
+                        </button>
+                        <button type="button" class="btn btn-outline-light d-none" id="editEpisodeBtn">
+                            <i class="ri-edit-line me-1"></i> Edit
+                        </button>
+                        <button type="button" class="btn btn-outline-danger d-none" id="deleteEpisodeBtn">
+                            <i class="ri-delete-bin-line me-1"></i> Delete
+                        </button>
+                    </div>
+                    <button type="button" class="btn btn-gradient-primary" id="downloadBtn">
+                        <i class="ri-download-line me-1"></i> Download
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Music Player -->
+    <div class="floating-player">
+        <div class="player-content">
+            <div class="player-info">
+                <div class="player-thumbnail">
+                    <i class="ri-music-2-fill"></i>
+                </div>
+                <div class="player-text">
+                    <div class="player-title">No episode selected</div>
+                    <div class="player-category">--</div>
+                </div>
+            </div>
+            <div class="player-controls">
+                <button class="control-btn" id="playPauseBtn">
+                    <i class="ri-play-fill"></i>
+                </button>
+                <button class="control-btn" id="stopBtn">
+                    <i class="ri-stop-fill"></i>
+                </button>
+                <button class="control-btn" id="closePlayerBtn">
+                    <i class="ri-close-fill"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toggle Add Section Button -->
+    <button class="toggle-add-btn" id="toggleAddBtn">
+        <i class="ri-add-line"></i>
+    </button>
+
+    <!-- Scroll to Top Button -->
+    <button class="btn-scroll-top">
+        <i class="ri-arrow-up-line"></i>
+    </button>
+
+    <!-- Confetti Canvas -->
+    <canvas id="confetti-canvas"></canvas>
+
+    <!-- Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-storage-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+    
+    <!-- Custom JS -->
+    <script src="config.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
