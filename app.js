@@ -400,45 +400,41 @@ async function displayFavorites() {
 uploadForm.addEventListener('submit', async function(e) {
     e.preventDefault();
     
-    // Check if user is authenticated
     if (!auth.currentUser) {
-        alert('Please login to upload episodes');
         loginModal.show();
         return;
     }
-    
-    if (!this.checkValidity()) {
-        e.stopPropagation();
-        this.classList.add('was-validated');
-        return;
-    }
-    
+
+    // Get form elements
     const title = document.getElementById('episodeTitle').value;
     const description = document.getElementById('episodeDescription').value;
     const type = document.getElementById('episodeType').value;
     const date = document.getElementById('episodeDate').value;
     const file = document.getElementById('audioFile').files[0];
     const isEditMode = this.dataset.editMode;
-    
+
+    // Validate only required fields
+    if (!title.trim()) {
+        alert('Title is required');
+        return;
+    }
+
     // Show loading state
     uploadBtn.disabled = true;
     uploadBtnText.textContent = isEditMode ? 'Updating...' : 'Uploading...';
     uploadSpinner.classList.remove('d-none');
-    
+
     try {
-        let downloadURL = currentPlayingEpisode?.audioUrl;
+        let downloadURL;
         
+        // Only handle file if one was selected
         if (file) {
-            // Upload new audio file to Firebase Storage
             const storageRef = storage.ref(`episodes/${Date.now()}_${file.name}`);
             await storageRef.put(file);
             downloadURL = await storageRef.getDownloadURL();
-        } else if (!isEditMode) {
-            // Require file for new episodes
-            throw new Error('Please select an audio file');
         }
-        
-        // Prepare episode data
+
+        // Prepare update data - only include what's changed
         const episodeData = {
             title,
             description,
@@ -446,55 +442,48 @@ uploadForm.addEventListener('submit', async function(e) {
             date,
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         };
-        
-        // Only include audioUrl if we have one
+
+        // Only include audioUrl if we have a new file
         if (downloadURL) {
             episodeData.audioUrl = downloadURL;
         }
-        
+
         if (isEditMode) {
             // Update existing episode
             await db.collection('episodes').doc(isEditMode).update(episodeData);
             
-            // Update the current playing episode if it's the one being edited
+            // Update local copy if it's the currently playing episode
             if (currentPlayingEpisode && currentPlayingEpisode.id === isEditMode) {
-                currentPlayingEpisode = {
-                    ...currentPlayingEpisode,
-                    ...episodeData
-                };
+                Object.assign(currentPlayingEpisode, episodeData);
             }
             
             alert('Episode updated successfully!');
         } else {
-            // Create new episode
+            // For new episodes, require a file
+            if (!file) {
+                throw new Error('Please select an audio file for new episodes');
+            }
+            
             episodeData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+            episodeData.audioUrl = downloadURL;
             await db.collection('episodes').add(episodeData);
-            confetti({
-                particleCount: 100,
-                spread: 70,
-                origin: { y: 0.6 }
-            });
         }
-        
+
         // Reset form
         this.reset();
-        this.classList.remove('was-validated');
         delete this.dataset.editMode;
-        document.getElementById('episodeDate').value = today;
+        document.getElementById('episodeDate').value = new Date().toISOString().split('T')[0];
         fileInfo.classList.add('d-none');
-        uploadBtnText.textContent = 'Upload Episode';
         cancelEditBtn.classList.add('d-none');
-        
+        uploadBtnText.textContent = 'Upload Episode';
+
         // Reload episodes
         if (isViewingFavorites) {
             displayFavorites();
         } else {
             loadEpisodes();
         }
-        
-        // Close the add episode section if it was open
-        addEpisodeSection.classList.remove('expanded');
-        toggleAddBtn.classList.remove('expanded');
+
     } catch (error) {
         console.error('Error:', error);
         alert(`Error: ${error.message}`);
@@ -619,7 +608,7 @@ function displayEpisodes() {
                 <h3 class="episode-title">${episode.title}</h3>
                 <div class="episode-description-container">
                     <p class="episode-description">${displayDescription}</p>
-                    ${shouldTruncate ? `<button class="read-more-btn" data-full="${description}">Read more</button>` : ''}
+                    ${shouldTruncate ? `<button class="read-more-btn" data-full="${escapeHtml(description)}">Read more</button>` : ''}
                 </div>
                 <div class="episode-meta">
                     <div class="meta-item">
@@ -981,44 +970,40 @@ editEpisodeBtn.addEventListener('click', function() {
     if (!currentPlayingEpisode) return;
     
     // Populate form with episode data
-    const form = uploadForm;
-    form.reset(); // Reset first to clear any previous state
-    
     document.getElementById('episodeTitle').value = currentPlayingEpisode.title;
     document.getElementById('episodeDescription').value = currentPlayingEpisode.description || '';
     document.getElementById('episodeType').value = currentPlayingEpisode.type || '';
-    document.getElementById('episodeDate').value = currentPlayingEpisode.date || today;
+    document.getElementById('episodeDate').value = currentPlayingEpisode.date || new Date().toISOString().split('T')[0];
     
-    // Clear file input but keep the existing audio URL
+    // Clear file input but keep it optional
     fileInput.value = '';
     fileInfo.classList.add('d-none');
     
     // Set edit mode
-    form.dataset.editMode = currentPlayingEpisode.id;
+    uploadForm.dataset.editMode = currentPlayingEpisode.id;
     uploadBtnText.textContent = 'Update Episode';
     cancelEditBtn.classList.remove('d-none');
     
+    // Make file input not required during edits
+    fileInput.required = false;
+    
     // Show the form
     addEpisodeSection.classList.add('expanded');
-    toggleAddBtn.classList.add('expanded');
     document.getElementById('scroll-here').scrollIntoView({ behavior: 'smooth' });
-    
-    // Close player modal
     audioPlayerModal.hide();
-    
-    // Remove validation classes
-    form.classList.remove('was-validated');
 });
 
 // Cancel edit button
 cancelEditBtn.addEventListener('click', function() {
     uploadForm.reset();
-    uploadForm.classList.remove('was-validated');
     delete uploadForm.dataset.editMode;
-    document.getElementById('episodeDate').value = today;
+    document.getElementById('episodeDate').value = new Date().toISOString().split('T')[0];
     fileInfo.classList.add('d-none');
     uploadBtnText.textContent = 'Upload Episode';
     cancelEditBtn.classList.add('d-none');
+    
+    // Reset file input requirement
+    fileInput.required = true;
 });
 
 // Delete episode button
